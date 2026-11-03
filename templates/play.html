@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Термінал Учасника (/play) | Кремнієва Долина: Битва Стартапів</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <style>
+    :root {
+      --bg-canvas: #F4F9F6;
+      --bg-mint-soft: #EBF5EE;
+      --card-bg: rgba(255, 255, 255, 0.92);
+      --border-mint: #D1E7DD;
+      --border-strong: #A7F3D0;
+      --primary-green: #10B981;
+      --primary-green-dark: #059669;
+      --deep-forest: #064E3B;
+      --deep-navy: #0F172A;
+      --text-muted: #475569;
+      --gold-amber: #F59E0B;
+      --gold-bg: #FEF3C7;
+      --alert-red: #EF4444;
+      --alert-red-bg: #FEE2E2;
+      --radius-md: 14px;
+      --radius-lg: 18px;
+      --shadow-soft: 0 10px 28px rgba(6, 78, 59, 0.07);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(155deg, var(--bg-canvas) 0%, var(--bg-mint-soft) 100%);
+      color: var(--deep-navy);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 90;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-mint);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--primary-green), var(--deep-forest));
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.15rem;
+    }
+
+    .brand-title {
+      font-weight: 800;
+      font-size: 0.98rem;
+      color: var(--deep-forest);
+    }
+
+    .brand-sub {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    .coin-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--gold-bg);
+      color: #92400E;
+      border: 1px solid #FCD34D;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 0.9rem;
+      box-shadow: 0 2px 6px rgba(245, 158, 11, 0.15);
+    }
+
+    .main-wrap {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 18px 14px 48px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border-mint);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .section-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg-mint-soft);
+      color: var(--deep-forest);
+      border: 1px solid var(--border-strong);
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--deep-forest);
+      margin-bottom: 6px;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: var(--deep-forest);
+      margin-bottom: 6px;
+    }
+
+    .form-input, .form-select {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border-mint);
+      background: #fff;
+      font-family: inherit;
+      font-size: 0.96rem;
+      color: var(--deep-navy);
+      outline: none;
+    }
+
+    .form-input:focus, .form-select:focus {
+      border-color: var(--primary-green);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 13px 18px;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      font-family: inherit;
+      font-size: 0.96rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: #fff;
+      color: var(--deep-forest);
+      border-color: var(--border-mint);
+    }
+
+    /* Secret Role Card */
+    .role-card {
+      background: linear-gradient(135deg, #ECFDF5 0%, #E6F4EA 100%);
+      border: 1px solid var(--border-strong);
+      border-radius: 14px;
+      padding: 16px;
+    }
+
+    .role-card.shadow-role {
+      background: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%);
+      border-color: #FCA5A5;
+    }
+
+    .role-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .role-badge-text {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--deep-forest);
+    }
+
+    .shadow-role .role-badge-text {
+      color: #991B1B;
+    }
+
+    .role-desc {
+      font-size: 0.86rem;
+      color: var(--deep-navy);
+      margin-top: 8px;
+    }
+
+    /* Digest & Timer Box */
+    .news-banner {
+      background: #fff;
+      border-left: 4px solid var(--primary-green);
+      border-radius: 12px;
+      padding: 14px 16px;
+      border-top: 1px solid var(--border-mint);
+      border-right: 1px solid var(--border-mint);
+      border-bottom: 1px solid var(--border-mint);
+    }
+
+    .timer-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-mint-soft);
+      border: 1px solid var(--border-strong);
+      border-radius: 10px;
+      padding: 8px 14px;
+      margin-top: 12px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--deep-forest);
+    }
+
+    /* Voting Roster */
+    .vote-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .vote-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 12px 14px;
+      background: #fff;
+      border: 1px solid var(--border-mint);
+      border-radius: 12px;
+    }
+
+    .vote-item.selected {
+      border: 2px solid var(--primary-green);
+      background: #ECFDF5;
+    }
+
+    .vote-btn {
+      width: auto;
+      padding: 8px 14px;
+      font-size: 0.84rem;
+      border-radius: 10px;
+    }
+
+    /* Sleep Screen Financial Tip */
+    .sleep-tip-box {
+      background: var(--bg-mint-soft);
+      border: 1px dashed var(--primary-green);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .kyc-result-card {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    .kyc-legal {
+      background: #D1FAE5;
+      color: #065F46;
+      border: 1px solid #6EE7B7;
+    }
+
+    .kyc-shadow {
+      background: #FEE2E2;
+      color: #991B1B;
+      border: 1px solid #FCA5A5;
+    }
+
+    .bankrupt-banner {
+      background: var(--alert-red-bg);
+      border: 1px solid #FCA5A5;
+      color: #991B1B;
+      padding: 14px;
+      border-radius: 12px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    /* Secret Cartel Chat — Crimson & Obsidian Black Theme */
+    .cartel-chat-card {
+      background: linear-gradient(155deg, #090305 0%, #16060A 55%, #22080E 100%) !important;
+      border: 1.5px solid #DC2626 !important;
+      box-shadow: 0 12px 32px rgba(220, 38, 38, 0.25), inset 0 1px 0 rgba(248, 113, 113, 0.18) !important;
+      color: #FEE2E2;
+    }
+
+    .cartel-messages {
+      max-height: 200px;
+      overflow-y: auto;
+      background: #050203;
+      border: 1px solid rgba(220, 38, 38, 0.45);
+      border-radius: 12px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 10px;
+      box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.7);
+    }
+
+    .cartel-msg {
+      font-size: 0.84rem;
+      line-height: 1.38;
+      padding: 7px 11px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, rgba(127, 29, 29, 0.45) 0%, rgba(69, 10, 10, 0.65) 100%);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      border-left: 3px solid #EF4444;
+      color: #FEE2E2;
+    }
+
+    .cartel-msg.sys {
+      background: rgba(24, 24, 27, 0.85);
+      border: 1px dashed rgba(248, 113, 113, 0.4);
+      border-left: 3px solid #F87171;
+      color: #FCA5A5;
+      font-style: italic;
+    }
+
+    .cartel-msg-meta {
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: #F87171;
+      margin-bottom: 2px;
+      letter-spacing: 0.02em;
+    }
+
+    .quick-chips {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .quick-chip {
+      background: #140508;
+      border: 1px solid rgba(239, 68, 68, 0.5);
+      color: #FCA5A5;
+      border-radius: 999px;
+      padding: 5px 11px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .quick-chip:hover {
+      background: #7F1D1D;
+      color: #FFFFFF;
+      border-color: #F87171;
+    }
+
+    .chat-input-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .cartel-chat-card .form-input {
+      background: #0D0406 !important;
+      border: 1px solid rgba(220, 38, 38, 0.55) !important;
+      color: #FEE2E2 !important;
+    }
+
+    .cartel-chat-card .form-input::placeholder {
+      color: rgba(252, 165, 165, 0.5) !important;
+    }
+
+    .cartel-chat-card .form-input:focus {
+      border-color: #EF4444 !important;
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25) !important;
+    }
+
+    /* ==========================================================================
+       NIGHT MODE THEME (High-Contrast Black Background during NIGHT Phase)
+       ========================================================================== */
+    body {
+      transition: background 0.45s ease, color 0.35s ease;
+    }
+
+    body.night-mode {
+      --bg-canvas: #05070B;
+      --bg-mint-soft: #0D1916;
+      --card-bg: rgba(13, 18, 28, 0.94);
+      --border-mint: #1E293B;
+      --border-strong: rgba(52, 211, 153, 0.35);
+      --deep-forest: #34D399;
+      --deep-navy: #F8FAFC;
+      --text-muted: #94A3B8;
+      background: radial-gradient(circle at 50% 0%, #0C221B 0%, #06090F 55%, #020407 100%);
+      color: #F8FAFC;
+    }
+
+    body.night-mode .topbar {
+      background: rgba(8, 12, 20, 0.94);
+      border-bottom-color: #1E293B;
+    }
+
+    body.night-mode .card {
+      background: rgba(13, 18, 28, 0.94);
+      border-color: #1E293B;
+      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.65);
+    }
+
+    body.night-mode .role-card {
+      background: linear-gradient(135deg, #091E18 0%, #0D2921 100%);
+      border-color: rgba(52, 211, 153, 0.4);
+    }
+
+    body.night-mode .role-card.shadow-role {
+      background: linear-gradient(135deg, #1A0609 0%, #2A080E 100%);
+      border-color: #DC2626;
+    }
+
+    body.night-mode .role-card.shadow-role .role-badge-text,
+    body.night-mode #cartelTeammatesBox {
+      color: #FCA5A5 !important;
+    }
+
+    body.night-mode .news-banner,
+    body.night-mode .vote-item {
+      background: #090D15;
+      border-color: #1E293B;
+      color: #F8FAFC;
+    }
+
+    body.night-mode .form-input,
+    body.night-mode .form-select {
+      background: #090D15;
+      border-color: #334155;
+      color: #F8FAFC;
+    }
+
+    body.night-mode .btn-secondary {
+      background: #111827;
+      color: #E2E8F0;
+      border-color: #334155;
+    }
+
+    body.night-mode .sleep-tip-box {
+      background: #091512;
+      border-color: #10B981;
+      color: #F8FAFC;
+    }
+
+    body.night-mode .coin-badge {
+      background: rgba(245, 158, 11, 0.16);
+      color: #FBBF24;
+      border-color: rgba(251, 191, 36, 0.45);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-logo">🌱</div>
+      <div>
+        <div class="brand-title" id="topCompanyTitle">Кремнієва Долина</div>
+        <div class="brand-sub" id="topFounderSub">Термінал Учасника</div>
+      </div>
+    </div>
+
+    <div class="coin-badge" id="topCoinBadge" style="display: none;">
+      <span>🪙</span> <span id="topCoinVal">100</span> SC
+    </div>
+  </header>
+
+  <main class="main-wrap">
+
+    <!-- 1. LOGIN / REGISTRATION VIEW -->
+    <section class="card" id="loginCard">
+      <div class="section-tag">🚀 Реєстрація Стартапу</div>
+      <h2>Вхід до Кремнієвої Долини</h2>
+      <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 16px;">
+        Введіть назву вашої інноваційної компанії та ваше ім'я, щоб отримати <strong>100 🪙 Startup-Coins</strong>.
+      </p>
+
+      <form id="registerForm">
+        <div id="loginErrorBox" style="display: none; background: #FEE2E2; color: #991B1B; border: 1px solid #FCA5A5; border-radius: 10px; padding: 10px 12px; font-size: 0.84rem; font-weight: 700; margin-bottom: 12px;"></div>
+        <div class="form-group">
+          <label class="form-label" for="roomCodeInput">🔑 Код Ігрової Сесії (4 цифри від вчителя):</label>
+          <input type="text" id="roomCodeInput" class="form-input" placeholder="Наприклад: 4821" required maxlength="6" style="font-weight: 800; letter-spacing: 0.08em;">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="companyInput">Назва вашого Стартапу:</label>
+          <input type="text" id="companyInput" class="form-input" placeholder="Наприклад: SolarTech UA" required maxlength="32">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="founderInput">Ваше Ім'я (Засновник):</label>
+          <input type="text" id="founderInput" class="form-input" placeholder="Наприклад: Максим" required maxlength="28">
+        </div>
+        <button type="submit" class="btn btn-primary">
+          Приєднатися до Сесії ✨
+        </button>
+      </form>
+    </section>
+
+    <!-- 2. ACTIVE PLAYER TERMINAL -->
+    <div id="playerTerminal" style="display: none; flex-direction: column; gap: 16px;">
+
+      <!-- Bankrupt Alert if 0 SC -->
+      <div id="bankruptBanner" class="bankrupt-banner" style="display: none;">
+        ❌ Ваша компанія оголосила банкрутство (0 🪙 SC). Ви можете спостерігати за сесією, але втратили право голосу та нічних операцій.
+      </div>
+
+      <!-- Private Role Card (Zero Leakage + Privacy Toggle) -->
+      <section class="card">
+        <div class="role-card" id="roleCardBox">
+          <div class="role-header">
+            <div>
+              <div style="font-size: 0.72rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted);">
+                Картка вашої таємної ролі
+              </div>
+              <div class="role-badge-text" id="myRoleBadge">Очікування розподілу</div>
+            </div>
+            <button type="button" class="btn btn-secondary" style="width: auto; padding: 6px 12px; font-size: 0.78rem;" onclick="toggleRolePrivacy()">
+              👁️ Приховати/Показати
+            </button>
+          </div>
+          <div class="role-desc" id="myRoleDesc">
+            Очікуйте, поки ведучий розподілить ролі між стартапами.
+          </div>
+          <div id="cartelTeammatesBox" style="display: none; margin-top: 10px; font-size: 0.8rem; font-weight: 700; color: #991B1B;"></div>
+        </div>
+      </section>
+
+      <!-- SECRET CARTEL CHAT CARD (Only for RAIDER & INSIDER when not hidden) -->
+      <section class="card cartel-chat-card" id="cartelChatCard" style="display: none;">
+        <div class="section-tag" style="background: rgba(220, 38, 38, 0.22); color: #FCA5A5; border-color: #EF4444;">
+          🕵️ Таємний Чат Картелю (Зашифровано)
+        </div>
+        <div class="cartel-messages" id="cartelMessagesBox"></div>
+
+        <div class="quick-chips">
+          <button type="button" class="quick-chip" onclick="sendQuickCartel('👍 Погоджуюсь із ціллю!')">👍 Погоджуюсь із ціллю</button>
+          <button type="button" class="quick-chip" onclick="sendQuickCartel('🔍 Треба знайти Аудитора!')">🔍 Шукаємо Аудитора</button>
+          <button type="button" class="quick-chip" onclick="sendQuickCartel('🏦 Хтось схожий на Банкіра')">🏦 Хто Банкір?</button>
+          <button type="button" class="quick-chip" onclick="sendQuickCartel('🤫 Голосуємо разом, своїх не топимо!')">🤫 Голосуємо разом</button>
+        </div>
+
+        <form id="cartelChatForm" class="chat-input-row">
+          <input type="text" id="cartelChatInput" class="form-input" placeholder="Написати спільникам картелю..." maxlength="180" style="padding: 9px 12px; font-size: 0.88rem;">
+          <button type="submit" class="btn btn-primary" style="width: auto; padding: 9px 16px; background: linear-gradient(135deg, #DC2626, #991B1B); box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);">
+            Надіслати
+          </button>
+        </form>
+      </section>
+
+      <!-- Phase & Market Headlines Card -->
+      <section class="card">
+        <div class="section-tag" id="phaseTagLabel">🏢 ФАЗА: ЛОБІ</div>
+        <div class="news-banner">
+          <h2 id="headlineText" style="font-size: 1.08rem;">Очікування початку гри</h2>
+          <p id="subheadlineText" style="font-size: 0.88rem; color: var(--text-muted);">
+            Ведучий готує відкриття торговельної сесії.
+          </p>
+        </div>
+
+        <div class="timer-bar" id="dayTimerBar" style="display: none;">
+          <span>⏱️ Таймер раунду обговорення:</span>
+          <span id="timerCountdown">01:00</span>
+        </div>
+      </section>
+
+      <!-- NIGHT TERMINAL CARD -->
+      <section class="card" id="nightActionCard" style="display: none;">
+        <div class="section-tag">🌙 Нічний Термінал</div>
+        <h2 id="nightTitle">Нічна фаза у Долині</h2>
+        <p id="nightSubtitle" style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 12px;"></p>
+
+        <!-- Active Night Role Dropdown (Raider, Insider, Banker, Auditor) -->
+        <div id="activeNightControls" style="display: none;">
+          <div class="form-group">
+            <label class="form-label" for="nightTargetSelect">Оберіть цільову компанію:</label>
+            <select id="nightTargetSelect" class="form-select"></select>
+          </div>
+          <button type="button" class="btn btn-primary" id="btnSubmitNight" onclick="submitNightChoice()">
+            Підтвердити нічну операцію ⚡
+          </button>
+          <div id="nightFeedbackMsg" style="margin-top: 10px; font-size: 0.86rem; font-weight: 700; color: var(--primary-green-dark);"></div>
+        </div>
+
+        <!-- Instant Private KYC Result for Tax Auditor -->
+        <div id="auditorKycBox" style="display: none;"></div>
+
+        <!-- Ethical Startup Educational Sleep Screen -->
+        <div id="ethicalSleepScreen" class="sleep-tip-box" style="display: none;">
+          <div style="font-size: 1.5rem; margin-bottom: 6px;">🛌💡</div>
+          <div style="font-weight: 800; color: var(--deep-forest); margin-bottom: 6px;">
+            Ваша компанія відпочиває до ранку
+          </div>
+          <p id="financialTipText" style="font-size: 0.88rem; color: var(--deep-navy);"></p>
+          <button type="button" class="btn btn-secondary" style="margin-top: 12px; padding: 8px 14px; font-size: 0.82rem;" onclick="nextFinancialTip()">
+            🔄 Наступна фінансова порада
+          </button>
+        </div>
+      </section>
+
+      <!-- VOTING TERMINAL CARD -->
+      <section class="card" id="votingCard" style="display: none;">
+        <div class="section-tag">🗳️ Фінансовий Аудит (Голосування)</div>
+        <h2>Проголосуйте проти підозрілої компанії</h2>
+        <p style="font-size: 0.86rem; color: var(--text-muted);">
+          Компанія, яка набере найбільше голосів, пройде примусову ліквідацію. Викриття шахрая принесе <strong>+20 🪙 SC</strong> усім легальним бізнесам!
+        </p>
+
+        <div class="vote-list" id="votingRosterList"></div>
+      </section>
+
+    </div>
+
+  </main>
+
+  <script>
+    const socket = io({
+      extraHeaders: { "ngrok-skip-browser-warning": "true" }
+    });
+    const STORAGE_KEY = 'sv_battle_player_id';
+    const ROOM_STORAGE_KEY = 'sv_battle_room_code';
+    const urlRoomParam = new URLSearchParams(window.location.search).get('room') || '';
+    if (urlRoomParam) {
+      document.getElementById('roomCodeInput').value = urlRoomParam;
+    } else if (localStorage.getItem(ROOM_STORAGE_KEY)) {
+      document.getElementById('roomCodeInput').value = localStorage.getItem(ROOM_STORAGE_KEY);
+    }
+
+    const FINANCIAL_TIPS = [
+      "💡 Порада №1: Диверсифікація — не тримайте всі інвестиції в одному проєкті, щоб зменшити ризики банкрутства.",
+      "💡 Порада №2: KYC (Know Your Customer) — завжди перевіряйте ділову репутацію партнерів перед підписанням угод.",
+      "💡 Порада №3: Страховий резерв (Подушка безпеки) дозволяє стартапу пережити кризу або рейдерську атаку.",
+      "💡 Порада №4: Пасивний дохід (+10 🪙 SC щоранку) формує стабільний грошовий потік (Cash Flow) вашого бізнесу.",
+      "💡 Порада №5: Висока дохідність без прозорої бізнес-моделі — головна ознака фінансової піраміди або шахрайства."
+    ];
+
+    let tipIndex = 0;
+    let roleHidden = false;
+    let currentState = null;
+    let countdownInterval = null;
+    let lastPhase = null;
+    let lastNightOptionsSig = '';
+    let lastCartelChatSig = '';
+
+    socket.on('connect', () => {
+      const savedId = localStorage.getItem(STORAGE_KEY);
+      const savedRoom = urlRoomParam || localStorage.getItem(ROOM_STORAGE_KEY) || '';
+      if (savedId) {
+        socket.emit('register_player', { player_id: savedId, room_code: savedRoom });
+      }
+    });
+
+    socket.on('registration_required', () => {
+      localStorage.removeItem(STORAGE_KEY);
+      document.getElementById('loginCard').style.display = 'block';
+      document.getElementById('playerTerminal').style.display = 'none';
+    });
+
+    socket.on('registration_error', (data) => {
+      const errBox = document.getElementById('loginErrorBox');
+      errBox.textContent = data.message || 'Помилка підключення до кімнати.';
+      errBox.style.display = 'block';
+      document.getElementById('loginCard').style.display = 'block';
+      document.getElementById('playerTerminal').style.display = 'none';
+    });
+
+    socket.on('registered_success', (data) => {
+      document.getElementById('loginErrorBox').style.display = 'none';
+      localStorage.setItem(STORAGE_KEY, data.player_id);
+      if (data.room_code) {
+        localStorage.setItem(ROOM_STORAGE_KEY, data.room_code);
+        document.getElementById('roomCodeInput').value = data.room_code;
+      }
+    });
+
+    socket.on('kicked_from_session', () => {
+      localStorage.removeItem(STORAGE_KEY);
+      alert('Ведучий видалив вашу компанію із сесії.');
+      window.location.reload();
+    });
+
+    socket.on('session_reset', () => {
+      localStorage.removeItem(STORAGE_KEY);
+      window.location.reload();
+    });
+
+    socket.on('action_feedback', (data) => {
+      const fb = document.getElementById('nightFeedbackMsg');
+      if (fb) {
+        fb.textContent = data.message;
+        fb.style.color = data.ok ? '#059669' : '#EF4444';
+      }
+    });
+
+    socket.on('auditor_kyc_result', (report) => {
+      renderAuditorReports([report]);
+    });
+
+    socket.on('player_state', (state) => {
+      currentState = state;
+      document.body.classList.toggle('night-mode', state.phase === 'NIGHT');
+      if (!state.me) {
+        document.getElementById('loginCard').style.display = 'block';
+        document.getElementById('playerTerminal').style.display = 'none';
+        return;
+      }
+
+      document.getElementById('loginCard').style.display = 'none';
+      document.getElementById('playerTerminal').style.display = 'flex';
+      renderPlayerUI(state);
+    });
+
+    document.getElementById('registerForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const roomCode = document.getElementById('roomCodeInput').value.trim();
+      const company = document.getElementById('companyInput').value.trim();
+      const name = document.getElementById('founderInput').value.trim();
+      if (!company || !name) return;
+
+      const savedId = localStorage.getItem(STORAGE_KEY);
+      socket.emit('register_player', { player_id: savedId, room_code: roomCode, company, name });
+    });
+
+    document.getElementById('cartelChatForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!currentState || !currentState.me) return;
+      const input = document.getElementById('cartelChatInput');
+      const text = input.value.trim();
+      if (!text) return;
+      socket.emit('send_cartel_message', {
+        player_id: currentState.me.id,
+        text
+      });
+      input.value = '';
+    });
+
+    function sendQuickCartel(text) {
+      if (!currentState || !currentState.me) return;
+      socket.emit('send_cartel_message', {
+        player_id: currentState.me.id,
+        text
+      });
+    }
+
+    function renderPlayerUI(state) {
+      const me = state.me;
+
+      // Header
+      document.getElementById('topCompanyTitle').textContent = me.company;
+      document.getElementById('topFounderSub').textContent = state.room_code
+        ? `🔑 Сесія #${state.room_code} • Засновник: ${me.name}`
+        : `Засновник: ${me.name}`;
+      document.getElementById('topCoinBadge').style.display = 'inline-flex';
+      document.getElementById('topCoinVal').textContent = me.coins;
+
+      // Bankrupt Banner
+      document.getElementById('bankruptBanner').style.display = me.status === 'BANKRUPT' ? 'block' : 'none';
+
+      // Role Card
+      const roleBox = document.getElementById('roleCardBox');
+      roleBox.classList.toggle('shadow-role', !!me.is_shadow && !roleHidden);
+
+      const cartelChatCard = document.getElementById('cartelChatCard');
+
+      if (roleHidden) {
+        document.getElementById('myRoleBadge').textContent = '🔒 Роль приховано';
+        document.getElementById('myRoleDesc').textContent = 'Натисніть «Приховати/Показати», щоб переглянути інструкцію ролі.';
+        document.getElementById('cartelTeammatesBox').style.display = 'none';
+        cartelChatCard.style.display = 'none';
+      } else {
+        document.getElementById('myRoleBadge').textContent = me.role_badge;
+        document.getElementById('myRoleDesc').textContent = me.role_description;
+
+        const matesBox = document.getElementById('cartelTeammatesBox');
+        if (me.cartel_teammates && me.cartel_teammates.length > 0) {
+          matesBox.style.display = 'block';
+          matesBox.textContent = 'Склад картелю: ' + me.cartel_teammates.map(c => `${c.company} (${c.role_title})`).join(', ');
+        } else {
+          matesBox.style.display = 'none';
+        }
+
+        // Show Secret Cartel Chat only to RAIDER and INSIDER
+        if (me.is_shadow) {
+          cartelChatCard.style.display = 'block';
+          renderCartelChat(me.cartel_chat || []);
+        } else {
+          cartelChatCard.style.display = 'none';
+        }
+      }
+
+      // Phase & Headlines
+      document.getElementById('phaseTagLabel').textContent = `ФАЗА: ${state.phase} • РАУНД ${state.round}`;
+      document.getElementById('headlineText').textContent = state.headline;
+      document.getElementById('subheadlineText').textContent = state.subheadline;
+
+      // Start 60s visual timer when entering DAY or VOTING
+      if (state.phase !== lastPhase) {
+        lastPhase = state.phase;
+        if (state.phase === 'DAY' || state.phase === 'VOTING') {
+          startRoundTimer(60);
+        } else {
+          stopRoundTimer();
+        }
+      }
+
+      // Night Terminal
+      const nightCard = document.getElementById('nightActionCard');
+      if (state.phase === 'NIGHT' && me.status !== 'BANKRUPT') {
+        nightCard.style.display = 'block';
+        renderNightTerminal(state);
+      } else {
+        nightCard.style.display = 'none';
+      }
+
+      // Voting Terminal
+      const votingCard = document.getElementById('votingCard');
+      if (state.phase === 'VOTING') {
+        votingCard.style.display = 'block';
+        renderVotingRoster(state);
+      } else {
+        votingCard.style.display = 'none';
+      }
+    }
+
+    function renderNightTerminal(state) {
+      const me = state.me;
+      const activeControls = document.getElementById('activeNightControls');
+      const sleepScreen = document.getElementById('ethicalSleepScreen');
+      const selectEl = document.getElementById('nightTargetSelect');
+
+      if (me.role === 'STARTUP' || me.role === 'UNASSIGNED') {
+        activeControls.style.display = 'none';
+        sleepScreen.style.display = 'block';
+        document.getElementById('nightTitle').textContent = '🌙 Нічний режим очікування';
+        document.getElementById('nightSubtitle').textContent = 'Поки фінансові інституції та аудитори працюють, ознайомтесь із правилами фінансової безпеки:';
+        document.getElementById('financialTipText').textContent = FINANCIAL_TIPS[tipIndex];
+        return;
+      }
+
+      sleepScreen.style.display = 'none';
+      activeControls.style.display = 'block';
+
+      if (me.role === 'RAIDER' || me.role === 'INSIDER') {
+        document.getElementById('nightTitle').textContent = '🏴‍☠️ Вороже Поглинання (-100 🪙 SC)';
+        document.getElementById('nightSubtitle').textContent = 'Оберіть компанію-мішень для нічної рейдерської атаки:';
+      } else if (me.role === 'BANKER') {
+        document.getElementById('nightTitle').textContent = '🏦 Антикризовий Грант / Страховий Щит';
+        document.getElementById('nightSubtitle').textContent = 'Оберіть стартап, який отримає захист від рейдерського поглинання цієї ночі:';
+      } else if (me.role === 'AUDITOR') {
+        document.getElementById('nightTitle').textContent = '🔍 Податковий KYC-Аудит';
+        document.getElementById('nightSubtitle').textContent = 'Оберіть компанію для миттєвої перевірки легальності бізнесу:';
+      }
+
+      // Populate dropdown preserving current selection & avoiding closing mobile dropdown
+      const cartelIds = new Set((me.cartel_teammates || []).map(c => c.id));
+      const eligible = state.players.filter(p => {
+        if (p.status === 'BANKRUPT') return false;
+        if (me.role === 'BANKER') return true;
+        if (me.role === 'RAIDER' || me.role === 'INSIDER') return !cartelIds.has(p.id);
+        return p.id !== me.id;
+      });
+
+      const optionsSig = `${state.round}_${me.role}_` + eligible.map(p => `${p.id}:${p.company}:${p.coins}`).join('|');
+      if (optionsSig !== lastNightOptionsSig) {
+        lastNightOptionsSig = optionsSig;
+        const previousVal = selectEl.value || me.night_target || '';
+        selectEl.innerHTML = eligible.map(p => `
+          <option value="${p.id}" ${p.id === previousVal ? 'selected' : ''}>
+            ${escapeHtml(p.company)} (${escapeHtml(p.name)}) — ${p.coins} 🪙 SC
+          </option>
+        `).join('');
+      }
+
+      renderAuditorReports(me.audit_reports || []);
+    }
+
+    function renderAuditorReports(reports) {
+      const box = document.getElementById('auditorKycBox');
+      if (!reports || !reports.length) {
+        box.style.display = 'none';
+        return;
+      }
+      box.style.display = 'block';
+      box.innerHTML = reports.map(r => `
+        <div class="kyc-result-card ${r.is_shadow ? 'kyc-shadow' : 'kyc-legal'}">
+          📋 Досьє «${escapeHtml(r.company)}» (Раунд ${r.round}): <u>${escapeHtml(r.verdict)}</u>
+        </div>
+      `).join('');
+    }
+
+    function submitNightChoice() {
+      if (!currentState || !currentState.me) return;
+      const targetId = document.getElementById('nightTargetSelect').value;
+      if (!targetId) return;
+      socket.emit('submit_night_action', {
+        player_id: currentState.me.id,
+        target_id: targetId
+      });
+    }
+
+    function renderVotingRoster(state) {
+      const me = state.me;
+      const listEl = document.getElementById('votingRosterList');
+      const candidates = state.players.filter(p => p.status !== 'BANKRUPT' && p.id !== me.id);
+
+      if (!candidates.length) {
+        listEl.innerHTML = `<div style="text-align:center;color:var(--text-muted);">Немає доступних компаній для голосування.</div>`;
+        return;
+      }
+
+      listEl.innerHTML = candidates.map(p => {
+        const isVoted = me.voted_for === p.id;
+        const disabledAttr = me.status === 'BANKRUPT' ? 'disabled' : '';
+        return `
+          <div class="vote-item ${isVoted ? 'selected' : ''}">
+            <div>
+              <div style="font-weight: 800; color: var(--deep-forest);">${escapeHtml(p.company)}</div>
+              <div style="font-size: 0.78rem; color: var(--text-muted);">
+                Засновник: ${escapeHtml(p.name)} • 🪙 ${p.coins} SC • Голосів: <strong>${p.votes_received}</strong>
+              </div>
+            </div>
+            <button class="btn ${isVoted ? 'btn-secondary' : 'btn-primary'} vote-btn" ${disabledAttr} onclick="castVote('${p.id}')">
+              ${isVoted ? '✓ Обрано' : 'Голосувати'}
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function castVote(targetId) {
+      if (!currentState || !currentState.me) return;
+      socket.emit('submit_vote', {
+        player_id: currentState.me.id,
+        target_id: targetId
+      });
+    }
+
+    function renderCartelChat(messages) {
+      const box = document.getElementById('cartelMessagesBox');
+      if (!box) return;
+      const lastMsg = messages && messages.length ? messages[messages.length - 1] : null;
+      const chatSig = messages ? `${messages.length}_${lastMsg ? lastMsg.time + lastMsg.text : ''}` : '0';
+      if (chatSig === lastCartelChatSig) return;
+      lastCartelChatSig = chatSig;
+
+      if (!messages || !messages.length) {
+        box.innerHTML = `<div style="text-align:center;color:var(--text-muted);font-size:0.8rem;">Повідомлень поки немає. Домовтесь про спільну ціль!</div>`;
+        return;
+      }
+      box.innerHTML = messages.map(m => `
+        <div class="cartel-msg ${m.is_system ? 'sys' : ''}">
+          <div class="cartel-msg-meta">[${escapeHtml(m.time)}] ${escapeHtml(m.sender)}</div>
+          <div>${escapeHtml(m.text)}</div>
+        </div>
+      `).join('');
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function toggleRolePrivacy() {
+      roleHidden = !roleHidden;
+      if (currentState) renderPlayerUI(currentState);
+    }
+
+    function nextFinancialTip() {
+      tipIndex = (tipIndex + 1) % FINANCIAL_TIPS.length;
+      document.getElementById('financialTipText').textContent = FINANCIAL_TIPS[tipIndex];
+    }
+
+    function startRoundTimer(seconds) {
+      stopRoundTimer();
+      let remaining = seconds;
+      const bar = document.getElementById('dayTimerBar');
+      const lbl = document.getElementById('timerCountdown');
+      bar.style.display = 'flex';
+
+      const updateLbl = () => {
+        const m = String(Math.floor(remaining / 60)).padStart(2, '0');
+        const s = String(remaining % 60).padStart(2, '0');
+        lbl.textContent = `${m}:${s}`;
+      };
+      updateLbl();
+
+      countdownInterval = setInterval(() => {
+        remaining = Math.max(0, remaining - 1);
+        updateLbl();
+        if (remaining <= 0) stopRoundTimer();
+      }, 1000);
+    }
+
+    function stopRoundTimer() {
+      if (countdownInterval) {
+        clearInterval(countdownInterval);
+        countdownInterval = null;
+      }
+      document.getElementById('dayTimerBar').style.display = 'none';
+    }
+
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+  </script>
+</body>
+</html>

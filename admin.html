@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Панель Ведучого (/admin) | Кремнієва Долина: Битва Стартапів</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    :root {
+      --bg-canvas: #F4F9F6;
+      --bg-mint-soft: #EBF5EE;
+      --card-bg: rgba(255, 255, 255, 0.92);
+      --border-mint: #D1E7DD;
+      --border-strong: #A7F3D0;
+      --primary-green: #10B981;
+      --primary-green-dark: #059669;
+      --deep-forest: #064E3B;
+      --deep-navy: #0F172A;
+      --text-muted: #475569;
+      --gold-amber: #F59E0B;
+      --gold-bg: #FEF3C7;
+      --alert-red: #EF4444;
+      --alert-red-bg: #FEE2E2;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --shadow-soft: 0 8px 24px rgba(6, 78, 59, 0.06);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(145deg, var(--bg-canvas) 0%, var(--bg-mint-soft) 100%);
+      color: var(--deep-navy);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    /* Top Bar */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-mint);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 14px;
+      box-shadow: 0 2px 12px rgba(6, 78, 59, 0.04);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--primary-green), var(--deep-forest));
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .brand h1 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--deep-forest);
+    }
+
+    .brand span {
+      display: block;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .status-pill {
+      background: var(--bg-mint-soft);
+      border: 1px solid var(--border-strong);
+      color: var(--deep-forest);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.84rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dot-live {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--primary-green);
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 9px 16px;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
+    }
+
+    .btn-secondary {
+      background: #fff;
+      color: var(--deep-forest);
+      border-color: var(--border-mint);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-mint-soft);
+      border-color: var(--primary-green);
+    }
+
+    .btn-amber {
+      background: var(--gold-bg);
+      color: #92400E;
+      border-color: #FCD34D;
+    }
+
+    .btn-amber:hover {
+      background: #FDE68A;
+    }
+
+    .btn-danger {
+      background: var(--alert-red-bg);
+      color: #B91C1C;
+      border-color: #FCA5A5;
+    }
+
+    .btn-danger:hover {
+      background: var(--alert-red);
+      color: #fff;
+    }
+
+    .btn-sm {
+      padding: 5px 10px;
+      font-size: 0.78rem;
+      border-radius: 8px;
+    }
+
+    /* Layout Grid */
+    .container {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 20px 24px 48px;
+      display: grid;
+      grid-template-columns: 1.35fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 1080px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .stack {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border-mint);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-mint);
+      flex-wrap: wrap;
+    }
+
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--deep-forest);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Phase Switchboard */
+    .phase-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+
+    @media (max-width: 720px) {
+      .phase-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .phase-btn {
+      padding: 12px 10px;
+      border-radius: 12px;
+      border: 1px solid var(--border-mint);
+      background: #fff;
+      color: var(--deep-navy);
+      font-weight: 700;
+      font-size: 0.82rem;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+
+    .phase-btn .step-num {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .phase-btn:hover {
+      border-color: var(--primary-green);
+      background: var(--bg-mint-soft);
+    }
+
+    .phase-btn.active {
+      background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
+      color: #fff;
+      border-color: var(--primary-green-dark);
+      box-shadow: 0 6px 16px rgba(16, 185, 129, 0.3);
+    }
+
+    .phase-btn.active .step-num {
+      color: #D1FAE5;
+    }
+
+    /* Night Resolver Monitor */
+    .night-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .night-slot {
+      background: var(--bg-canvas);
+      border: 1px solid var(--border-mint);
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
+
+    .night-slot-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .night-slot-val {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--deep-forest);
+      margin-top: 2px;
+    }
+
+    /* Economy Bar */
+    .economy-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    @media (max-width: 600px) {
+      .economy-grid, .night-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Player Table */
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+
+    th {
+      text-align: left;
+      padding: 10px 8px;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-mint);
+    }
+
+    td {
+      padding: 10px 8px;
+      border-bottom: 1px solid #ECFDF5;
+      vertical-align: middle;
+    }
+
+    tr:hover td {
+      background: rgba(235, 245, 238, 0.45);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .badge-active {
+      background: #D1FAE5;
+      color: #065F46;
+    }
+
+    .badge-audit {
+      background: var(--gold-bg);
+      color: #92400E;
+    }
+
+    .badge-bankrupt {
+      background: var(--alert-red-bg);
+      color: #991B1B;
+    }
+
+    .badge-role-legal {
+      background: #E0F2FE;
+      color: #075985;
+      border: 1px solid #BAE6FD;
+    }
+
+    .badge-role-shadow {
+      background: #FEE2E2;
+      color: #991B1B;
+      border: 1px solid #FECACA;
+    }
+
+    .coin-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--gold-bg);
+      color: #92400E;
+      border: 1px solid #FCD34D;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 0.82rem;
+    }
+
+    /* Interactive Teleprompter Tabs */
+    .tele-tabs {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .tele-tab {
+      padding: 7px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border-mint);
+      background: #fff;
+      color: var(--deep-forest);
+      font-weight: 600;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    .tele-tab.active {
+      background: var(--deep-forest);
+      color: #fff;
+      border-color: var(--deep-forest);
+    }
+
+    .tele-script {
+      background: var(--bg-mint-soft);
+      border-left: 4px solid var(--primary-green);
+      padding: 14px 16px;
+      border-radius: 0 12px 12px 0;
+      font-size: 0.9rem;
+      color: var(--deep-navy);
+    }
+
+    .tele-script p {
+      margin-bottom: 8px;
+    }
+
+    .tele-script p:last-child {
+      margin-bottom: 0;
+    }
+
+    .log-box {
+      max-height: 220px;
+      overflow-y: auto;
+      background: #F8FAFC;
+      border: 1px solid var(--border-mint);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-family: monospace;
+      font-size: 0.8rem;
+      color: #334155;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--deep-forest);
+      color: #fff;
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.88rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      z-index: 999;
+      display: none;
+    }
+
+    /* ==========================================================================
+       NIGHT MODE THEME (High-Contrast Black Background during NIGHT Phase)
+       ========================================================================== */
+    body {
+      transition: background 0.45s ease, color 0.35s ease;
+    }
+
+    body.night-mode {
+      --bg-canvas: #04060A;
+      --bg-mint-soft: #0B1915;
+      --card-bg: rgba(13, 19, 30, 0.95);
+      --border-mint: #1E293B;
+      --border-strong: #34D399;
+      --deep-forest: #6EE7B7;
+      --deep-navy: #F8FAFC;
+      --text-muted: #94A3B8;
+      background: radial-gradient(circle at 50% 0%, #0C221B 0%, #05080E 55%, #020305 100%);
+      color: #F8FAFC;
+    }
+
+    body.night-mode .topbar {
+      background: rgba(8, 12, 20, 0.95);
+      border-bottom-color: #1E293B;
+    }
+
+    body.night-mode .card {
+      background: rgba(13, 19, 30, 0.95);
+      border-color: #1E293B;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.65);
+    }
+
+    body.night-mode .phase-btn,
+    body.night-mode .btn-secondary,
+    body.night-mode .tele-tab:not(.active) {
+      background: #0F172A;
+      color: #E2E8F0;
+      border-color: #334155;
+    }
+
+    body.night-mode .phase-btn.active {
+      background: linear-gradient(135deg, #10B981, #047857);
+      color: #FFFFFF;
+      border-color: #34D399;
+    }
+
+    body.night-mode .night-slot,
+    body.night-mode .log-box {
+      background: #080C14;
+      border-color: #1E293B;
+      color: #E2E8F0;
+    }
+
+    body.night-mode td {
+      border-bottom-color: #1E293B;
+    }
+
+    body.night-mode tr:hover td {
+      background: rgba(16, 185, 129, 0.08);
+    }
+
+    /* QR Code Modal */
+    .qr-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(6, 20, 14, 0.72);
+      backdrop-filter: blur(6px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 16px;
+    }
+
+    .qr-modal-card {
+      background: #FFFFFF;
+      color: #0F172A;
+      border: 2px solid #10B981;
+      border-radius: 20px;
+      max-width: 440px;
+      width: 100%;
+      padding: 24px;
+      text-align: center;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+    }
+
+    .qr-box-wrap {
+      display: inline-flex;
+      padding: 16px;
+      background: #FFFFFF;
+      border: 2px dashed #A7F3D0;
+      border-radius: 16px;
+      margin: 14px auto;
+    }
+
+    .qr-url-pill {
+      background: #ECFDF5;
+      color: #064E3B;
+      border: 1px solid #6EE7B7;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-family: monospace;
+      font-size: 0.9rem;
+      font-weight: 700;
+      word-break: break-all;
+      margin-bottom: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation & Quick Links -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-icon">🌱</div>
+      <div>
+        <h1>Кремнієва Долина: Битва Стартапів — Панель Ведучого</h1>
+        <span>Тиждень фінансової грамотності (5–9 класи) • Zero-DB Live Server</span>
+      </div>
+    </div>
+
+    <div class="topbar-right">
+      <div class="status-pill" style="background: #FEF3C7; color: #92400E; border-color: #FCD34D;">
+        <span id="headerRoomCodeLabel">🔑 Сесія: #----</span>
+        <span id="headerRoomsCapLabel" style="font-size: 0.72rem; opacity: 0.85;">(0/25)</span>
+      </div>
+      <div class="status-pill">
+        <span class="dot-live"></span>
+        <span id="headerPhaseLabel">Фаза: LOBBY (Раунд 0)</span>
+      </div>
+      <div class="status-pill" id="headerCountLabel">👥 Учасників: 0</div>
+      <button class="btn btn-primary btn-sm" onclick="openQrModal()">📱 QR-код та Лінк</button>
+      <button class="btn btn-secondary btn-sm" onclick="copyPlayLink()">🔗 Копіювати лінк</button>
+      <button class="btn btn-secondary btn-sm" onclick="switchRoomPrompt()">🔑 Інша кімната</button>
+      <button class="btn btn-secondary btn-sm" onclick="createNewRoom()">➕ Нова сесія</button>
+      <a class="btn btn-secondary btn-sm" href="/rules" target="_blank">📖 Правила</a>
+      <a class="btn btn-secondary btn-sm" id="linkDisplayBtn" href="/display" target="_blank">🖥️ Екран (/display)</a>
+      <a class="btn btn-secondary btn-sm" id="linkPlayBtn" href="/play" target="_blank">📱 Учень (/play)</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- LEFT COLUMN: LOBBY MANAGEMENT & ROLES -->
+    <div class="stack">
+      <!-- Switchboard Card -->
+      <section class="card">
+        <div class="card-header">
+          <div class="card-title">🎛️ Перемикач Фаз Сесії (Phase Switchboard)</div>
+          <button class="btn btn-primary btn-sm" onclick="distributeRoles()">
+            ⚖️ Авто-баланс та Роздача Ролей
+          </button>
+        </div>
+
+        <div class="phase-grid">
+          <button class="phase-btn active" id="phaseBtn_LOBBY" onclick="setPhase('LOBBY')">
+            <span class="step-num">Крок 1</span>
+            <span>🏢 ЛОБІ</span>
+          </button>
+          <button class="phase-btn" id="phaseBtn_NIGHT" onclick="setPhase('NIGHT')">
+            <span class="step-num">Крок 2</span>
+            <span>🌙 НІЧ</span>
+          </button>
+          <button class="phase-btn" id="phaseBtn_DAY" onclick="setPhase('DAY')">
+            <span class="step-num">Крок 3</span>
+            <span>☀️ ДЕНЬ (ПІТЧ)</span>
+          </button>
+          <button class="phase-btn" id="phaseBtn_VOTING" onclick="setPhase('VOTING')">
+            <span class="step-num">Крок 4</span>
+            <span>🗳️ АУДИТ</span>
+          </button>
+          <button class="phase-btn" id="phaseBtn_RESOLVE" onclick="setPhase('RESOLVE')">
+            <span class="step-num">Крок 5</span>
+            <span>⚖️ ПІДСУМКИ</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Connected Startups Roster -->
+      <section class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <span>🏢 Реєстр Стартапів та Учасників</span>
+            <span class="badge badge-active" id="rosterCountBadge">0</span>
+          </div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="btn btn-secondary btn-sm" onclick="addOneBot()">🤖 +1 AI-Бот</button>
+            <button class="btn btn-secondary btn-sm" onclick="addDemoBots()">🤖 +5 AI-Ботів</button>
+            <button class="btn btn-secondary btn-sm" onclick="removeBots()">🧹 Прибрати ботів</button>
+            <button class="btn btn-danger btn-sm" onclick="resetSession()">🔄 Скинути раунд</button>
+            <button class="btn btn-danger btn-sm" onclick="closeRoomSession()" title="Повністю закрити кімнату та вивільнити слот">🚪 Закрити сесію</button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Стартап / Засновник</th>
+                <th>Секретна Роль</th>
+                <th>Капітал (SC)</th>
+                <th>Статус</th>
+                <th>Голоси</th>
+                <th>Керування</th>
+              </tr>
+            </thead>
+            <tbody id="playersTableBody">
+              <tr>
+                <td colspan="6" style="text-align:center; padding: 24px; color: var(--text-muted);">
+                  Очікуємо підключення учнів за маршрутом <strong>/play</strong> або натисніть «+ Демо-боти»...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <!-- RIGHT COLUMN: NIGHT ENGINE, ECONOMY, TELEPROMPTER & LOGS -->
+    <div class="stack">
+      <!-- Night Resolver Engine -->
+      <section class="card">
+        <div class="card-header">
+          <div class="card-title">🌙 Нічний Моніторинг та Резолвер</div>
+          <span class="badge badge-audit" id="nightActedBadge">Дій отримано: 0</span>
+        </div>
+
+        <div class="night-grid">
+          <div class="night-slot">
+            <div class="night-slot-label">🏴‍☠️ Ціль Рейдера (-100 SC)</div>
+            <div class="night-slot-val" id="nightRaiderTarget">Очікування вибору...</div>
+          </div>
+          <div class="night-slot">
+            <div class="night-slot-label">🕵️ Координація Інсайдера</div>
+            <div class="night-slot-val" id="nightInsiderTarget">Очікування вибору...</div>
+          </div>
+          <div class="night-slot">
+            <div class="night-slot-label">🏦 Грантовий щит Банкіра</div>
+            <div class="night-slot-val" id="nightBankerTarget">Очікування вибору...</div>
+          </div>
+          <div class="night-slot">
+            <div class="night-slot-label">🔍 KYC-перевірка Аудитора</div>
+            <div class="night-slot-val" id="nightAuditorTarget">Очікування вибору...</div>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" style="width: 100%;" onclick="resolveNight()">
+          ⚡ Обробити Нічні Транзакції та Оголосити Ранкові Новини
+        </button>
+      </section>
+
+      <!-- Economy Actions -->
+      <section class="card">
+        <div class="card-header">
+          <div class="card-title">🪙 Економічні Операції Центробанку</div>
+        </div>
+        <div class="economy-grid">
+          <button class="btn btn-amber" onclick="triggerEconomy('passive_yield')">
+            📈 Ранкові дивіденди (+10 🪙 SC активним)
+          </button>
+          <button class="btn btn-primary" onclick="triggerEconomy('audit_bounty')">
+            🏆 Бонус за шахрая (+20 🪙 SC легальним)
+          </button>
+        </div>
+      </section>
+
+      <!-- Interactive Teleprompter -->
+      <section class="card">
+        <div class="card-header">
+          <div class="card-title">🎙️ Інтерактивний Телесуфлер Ведучого</div>
+        </div>
+
+        <div class="tele-tabs">
+          <button class="tele-tab active" onclick="showScript('intro', this)">1. Відкриття Біржі</button>
+          <button class="tele-tab" onclick="showScript('night', this)">2. Нічна Сесія</button>
+          <button class="tele-tab" onclick="showScript('day', this)">3. Пітчинг (День)</button>
+          <button class="tele-tab" onclick="showScript('voting', this)">4. Фінансовий Аудит</button>
+        </div>
+
+        <div class="tele-script" id="teleprompterContent">
+          <p><strong>📣 Вступне слово вчителя:</strong></p>
+          <p>«Вітаю засновників у Кремнієвій Долині! Кожен із вас очолює інноваційний стартап зі стартовим капіталом <strong>100 🪙 Startup-Coins (SC)</strong>. Проте у Долині діє тіньовий картель — Рейдери та Інсайдер, які прагнуть довести чесні компанії до банкрутства.»</p>
+          <p>«Перевірте свої смартфони: ви отримали таємну роль. Нікому не показуйте екран свого термінала!»</p>
+        </div>
+      </section>
+
+      <!-- Live Cartel Chat Monitor for Teacher (Red-Black Syndicate Theme) -->
+      <section class="card" style="background: linear-gradient(155deg, #090305 0%, #16060A 60%, #22080E 100%); border-color: #DC2626;">
+        <div class="card-header">
+          <div class="card-title" style="color: #FCA5A5;">🕵️ Перехоплення Чату Картелю (Рейдери + Інсайдер)</div>
+        </div>
+        <div class="log-box" id="cartelChatMonitorBox" style="background: #050203; border-color: rgba(220, 38, 38, 0.45); color: #FEE2E2; max-height: 150px;">
+          <div>Очікування повідомлень між учасниками тіньового картелю...</div>
+        </div>
+      </section>
+
+      <!-- Live Audit Log -->
+      <section class="card">
+        <div class="card-header">
+          <div class="card-title">📜 Журнал Подій Сервера</div>
+        </div>
+        <div class="log-box" id="serverLogsBox"></div>
+      </section>
+    </div>
+  </main>
+
+  <div class="toast" id="adminToast"></div>
+
+  <!-- QR Code & Ngrok Link Modal -->
+  <div class="qr-modal-overlay" id="qrModalOverlay" onclick="if(event.target===this)closeQrModal()">
+    <div class="qr-modal-card">
+      <div style="font-size: 1.2rem; font-weight: 800; color: #064E3B;">📱 Вхід для Учнів (QR-код)</div>
+      <div style="font-size: 0.82rem; color: #475569; margin-top: 4px;" id="qrSourceBadge">
+        Автоматично визначене посилання (ngrok / Wi-Fi)
+      </div>
+
+      <div class="qr-box-wrap">
+        <div id="adminQrContainer"></div>
+      </div>
+
+      <div class="qr-url-pill" id="qrUrlDisplay">Завантаження посилання...</div>
+
+      <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 14px;">
+        <button class="btn btn-primary btn-sm" onclick="copyPlayLink()">📋 Скопіювати посилання</button>
+        <button class="btn btn-secondary btn-sm" onclick="closeQrModal()">Закрити</button>
+      </div>
+
+      <div style="border-top: 1px solid #E2E8F0; padding-top: 12px; text-align: left;">
+        <label style="font-size: 0.74rem; font-weight: 700; color: #475569; display: block; margin-bottom: 5px;">
+          Власне посилання тунелю (якщо використовуєте інший сервіс):
+        </label>
+        <div style="display: flex; gap: 6px;">
+          <input type="text" id="customUrlInput" placeholder="https://xxxx.ngrok-free.app" style="flex:1; padding: 7px 10px; border-radius: 8px; border: 1px solid #CBD5E1; font-size: 0.82rem;">
+          <button class="btn btn-secondary btn-sm" onclick="saveCustomShareUrl()">Зберегти</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 25-Room Capacity Reached Modal -->
+  <div class="qr-modal-overlay" id="capacityFullModal">
+    <div class="qr-modal-card" style="border-color: #EF4444;">
+      <div style="font-size: 2.2rem; margin-bottom: 6px;">🚫</div>
+      <div style="font-size: 1.2rem; font-weight: 800; color: #991B1B;">Немає вільних місць для ігрової сесії</div>
+      <p id="capacityFullText" style="font-size: 0.88rem; color: #475569; margin: 10px 0 16px; line-height: 1.45;">
+        Зараз на сервері одночасно проводяться максимальні <strong>25 із 25 шкільних сесій</strong>.
+        Будь ласка, зачекайте, поки одна зі шкіл завершить гру, або введіть PIN-код вже відкритої вами кімнати:
+      </p>
+      <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 12px;">
+        <input type="text" id="existingPinInput" placeholder="PIN-код (4 цифри)" maxlength="6" style="width: 160px; padding: 9px 12px; border-radius: 10px; border: 1px solid #CBD5E1; font-weight: 800; text-align: center;">
+        <button class="btn btn-primary btn-sm" onclick="joinExistingFromModal()">Увійти в кімнату</button>
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="retryCreateRoom()">🔄 Перевірити вільні місця знову</button>
+    </div>
+  </div>
+
+  <script>
+    // Dynamic Socket.IO binding (100% compatible with localhost and ngrok)
+    const socket = io({
+      extraHeaders: { "ngrok-skip-browser-warning": "true" }
+    });
+
+    const SCRIPTS = {
+      intro: `
+        <p><strong>📣 Відкриття біржі та розподіл ролей:</strong></p>
+        <p>«Вітаю засновників у Кремнієвій Долині! Кожен із вас очолює інноваційний стартап зі стартовим капіталом <strong>100 🪙 Startup-Coins (SC)</strong>. Проте у Долині діє тіньовий картель — Рейдери та Інсайдер, які прагнуть довести чесні компанії до банкрутства.»</p>
+        <p>«Перевірте свої смартфони: ви отримали таємну роль. Нікому не показуйте екран свого термінала!»</p>
+      `,
+      night: `
+        <p><strong>🌙 Модерація Нічної Фази:</strong></p>
+        <p>1. «Біржа зачиняється на нічний кліринг. Етичні стартапери вивчають фінансові поради на екранах.»</p>
+        <p>2. «Прокидаються <strong>Рейдер та Інсайдер Картелю</strong>. Оберіть у своїх терміналах компанію для ворожого поглинання на -100 🪙 SC.»</p>
+        <p>3. «Прокидається <strong>Венчурний Банкір</strong>. Оберіть стартап, якому ви надаєте рятувальний страховий грант.»</p>
+        <p>4. «Прокидається <strong>Податковий Аудитор</strong>. Оберіть компанію для миттєвої перевірки KYC-досьє.»</p>
+      `,
+      day: `
+        <p><strong>☀️ Ранкові Новини та Раунд Пітчингу:</strong></p>
+        <p>«Настає ранок у Кремнієвій Долині! Усі активні компанії отримують +10 🪙 SC пасивного доходу. Погляньте на головний екран — оголошено результати нічних транзакцій!»</p>
+        <p>«Зараз кожен засновник має 30–60 секунд на короткий <strong>Pitch</strong>: чим корисний ваш стартап і чому інвестори мають довіряти вашій фінансовій звітності?»</p>
+      `,
+      voting: `
+        <p><strong>🗳️ Фінансовий Аудит та Голосування:</strong></p>
+        <p>«Переходимо до голосування Ради директорів! У ваших терміналах відкрито список активних компаній. Проголосуйте проти стартапу, який ви підозрюєте у тіньових махінаціях.»</p>
+        <p>«Пам'ятайте: якщо ми викриємо Рейдера або Інсайдера, кожен легальний бізнес отримає бонус <strong>+20 🪙 SC</strong>!»</p>
+      `
+    };
+
+    const ROOM_STORAGE_KEY = 'sv_admin_room_code';
+    let currentRoomCode = new URLSearchParams(window.location.search).get('room')
+      || sessionStorage.getItem(ROOM_STORAGE_KEY)
+      || '';
+    let latestShareUrl = '';
+
+    socket.on('connect', () => {
+      socket.emit('join_admin', { room_code: currentRoomCode });
+    });
+
+    socket.on('admin_toast', (data) => {
+      showToast(data.message);
+    });
+
+    socket.on('room_capacity_full', (data) => {
+      document.getElementById('capacityFullText').textContent = data.message;
+      document.getElementById('capacityFullModal').style.display = 'flex';
+      showToast(data.message);
+    });
+
+    socket.on('room_closed', (data) => {
+      sessionStorage.removeItem(ROOM_STORAGE_KEY);
+      currentRoomCode = '';
+      showToast(data.message);
+      setTimeout(() => {
+        const createAgain = confirm(`${data.message}\n\nБажаєте створити нову ігрову сесію?`);
+        if (createAgain) {
+          socket.emit('join_admin', { create_new: true });
+        }
+      }, 200);
+    });
+
+    socket.on('admin_state', (state) => {
+      document.getElementById('capacityFullModal').style.display = 'none';
+      if (state.room_code) {
+        currentRoomCode = state.room_code;
+        sessionStorage.setItem(ROOM_STORAGE_KEY, currentRoomCode);
+        const newUrl = `${window.location.pathname}?room=${currentRoomCode}`;
+        window.history.replaceState(null, '', newUrl);
+        document.getElementById('headerRoomCodeLabel').textContent = `🔑 Сесія: #${currentRoomCode}`;
+        document.getElementById('headerRoomsCapLabel').textContent = `(${state.active_rooms_count || 1}/${state.max_rooms || 25})`;
+        document.getElementById('linkDisplayBtn').href = `/display?room=${currentRoomCode}`;
+        document.getElementById('linkPlayBtn').href = `/play?room=${currentRoomCode}`;
+      }
+      if (state.share_url) {
+        latestShareUrl = state.share_url;
+      }
+      renderAdminState(state);
+      if (document.getElementById('qrModalOverlay').style.display === 'flex') {
+        renderQrCodeBox();
+      }
+    });
+
+    function renderAdminState(state) {
+      document.body.classList.toggle('night-mode', state.phase === 'NIGHT');
+
+      // Update header
+      document.getElementById('headerPhaseLabel').textContent = `Фаза: ${state.phase} (Раунд ${state.round})`;
+      document.getElementById('headerCountLabel').textContent = `👥 Учасників: ${state.players.length}`;
+      document.getElementById('rosterCountBadge').textContent = state.players.length;
+
+      // Highlight active phase button
+      ['LOBBY', 'NIGHT', 'DAY', 'VOTING', 'RESOLVE'].forEach(ph => {
+        const btn = document.getElementById(`phaseBtn_${ph}`);
+        if (btn) {
+          btn.classList.toggle('active', state.phase === ph);
+        }
+      });
+
+      // Night monitor
+      const ns = state.night_summary;
+      document.getElementById('nightActedBadge').textContent = `Дій отримано: ${ns.acted_count}`;
+      document.getElementById('nightRaiderTarget').textContent = ns.raider_target_name || 'Очікування вибору...';
+      document.getElementById('nightInsiderTarget').textContent = ns.insider_target_name || 'Очікування вибору...';
+      document.getElementById('nightBankerTarget').textContent = ns.banker_target_name || 'Очікування вибору...';
+      document.getElementById('nightAuditorTarget').textContent = ns.auditor_target_name || 'Очікування вибору...';
+
+      // Render players table
+      const tbody = document.getElementById('playersTableBody');
+      if (!state.players.length) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" style="text-align:center; padding: 24px; color: var(--text-muted);">
+              Очікуємо підключення учнів за маршрутом <strong>/play</strong> або натисніть «+ Демо-боти»...
+            </td>
+          </tr>
+        `;
+      } else {
+        tbody.innerHTML = state.players.map(p => {
+          const statusBadge = p.status === 'ACTIVE'
+            ? `<span class="badge badge-active">🟢 Працює</span>`
+            : (p.status === 'UNDER_AUDIT'
+              ? `<span class="badge badge-audit">⚠️ Під Аудитом</span>`
+              : `<span class="badge badge-bankrupt">❌ Збанкрутував</span>`);
+
+          const roleClass = p.is_shadow ? 'badge-role-shadow' : 'badge-role-legal';
+          const onlineDot = p.online ? '🟢' : '⚪';
+
+          return `
+            <tr>
+              <td>
+                <div style="font-weight: 700; color: var(--deep-forest);">
+                  ${onlineDot} ${escapeHtml(p.company)} ${p.is_bot ? '<span style="font-size:0.7rem;color:#64748B;">[Бот]</span>' : ''}
+                </div>
+                <div style="font-size: 0.78rem; color: var(--text-muted);">Засновник: ${escapeHtml(p.name)}</div>
+              </td>
+              <td>
+                <span class="badge ${roleClass}">${escapeHtml(p.role_badge)}</span>
+              </td>
+              <td>
+                <span class="coin-pill">🪙 ${p.coins} SC</span>
+              </td>
+              <td>${statusBadge}</td>
+              <td>
+                <strong>${p.votes_received}</strong>
+                ${state.phase === 'VOTING' && p.status !== 'BANKRUPT'
+                  ? `<div style="font-size:0.7rem;color:${p.has_voted ? '#059669' : '#D97706'};font-weight:700;">${p.has_voted ? '✓ Голос віддано' : '⏳ Думає...'}</div>`
+                  : ''}
+              </td>
+              <td>
+                <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                  <button class="btn btn-secondary btn-sm" title="+10 SC" onclick="adjustCoins('${p.id}', 10)">+10</button>
+                  <button class="btn btn-secondary btn-sm" title="-10 SC" onclick="adjustCoins('${p.id}', -10)">-10</button>
+                  <button class="btn btn-secondary btn-sm" title="Змінити назву" onclick="renamePlayer('${p.id}', '${escapeJs(p.company)}', '${escapeJs(p.name)}')">✏️</button>
+                  <button class="btn btn-secondary btn-sm" title="Змінити статус" onclick="toggleStatus('${p.id}')">♻️</button>
+                  <button class="btn btn-danger btn-sm" title="Видалити з сесії" onclick="kickPlayer('${p.id}')">✕</button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      // Render cartel chat monitor
+      const cartelBox = document.getElementById('cartelChatMonitorBox');
+      if (state.cartel_chat && state.cartel_chat.length) {
+        cartelBox.innerHTML = state.cartel_chat
+          .slice()
+          .reverse()
+          .map(m => `<div><strong>[${escapeHtml(m.time)}] ${escapeHtml(m.sender)}:</strong> ${escapeHtml(m.text)}</div>`)
+          .join('');
+      } else {
+        cartelBox.innerHTML = `<div>Очікування повідомлень між учасниками тіньового картелю...</div>`;
+      }
+
+      // Render logs
+      const logsBox = document.getElementById('serverLogsBox');
+      logsBox.innerHTML = (state.logs || []).map(l => `<div>${escapeHtml(l)}</div>`).join('');
+    }
+
+    function distributeRoles() {
+      socket.emit('admin_distribute_roles');
+    }
+
+    function setPhase(phase) {
+      socket.emit('admin_set_phase', { phase });
+    }
+
+    function resolveNight() {
+      socket.emit('admin_resolve_night');
+    }
+
+    function triggerEconomy(type) {
+      socket.emit('admin_economy_action', { type });
+    }
+
+    function adjustCoins(playerId, delta) {
+      socket.emit('admin_economy_action', { type: 'adjust_player', player_id: playerId, delta });
+    }
+
+    function kickPlayer(playerId) {
+      socket.emit('admin_manage_player', { command: 'kick', player_id: playerId });
+    }
+
+    function toggleStatus(playerId) {
+      socket.emit('admin_manage_player', { command: 'toggle_status', player_id: playerId });
+    }
+
+    function renamePlayer(playerId, oldCompany, oldName) {
+      const company = prompt('Нова назва стартапу:', oldCompany);
+      if (company === null) return;
+      const name = prompt("Ім'я засновника:", oldName);
+      if (name === null) return;
+      socket.emit('admin_manage_player', { command: 'rename', player_id: playerId, company, name });
+    }
+
+    function addOneBot() {
+      socket.emit('admin_manage_player', { command: 'add_one_bot' });
+    }
+
+    function addDemoBots() {
+      socket.emit('admin_manage_player', { command: 'add_bots', count: 5 });
+    }
+
+    function removeBots() {
+      socket.emit('admin_manage_player', { command: 'remove_bots' });
+    }
+
+    function resetSession() {
+      if (confirm(`Очистити поточну сесію #${currentRoomCode} та скинути всіх гравців (код кімнати збережеться)?`)) {
+        socket.emit('admin_manage_player', { command: 'reset_game', room_code: currentRoomCode });
+      }
+    }
+
+    function closeRoomSession() {
+      if (confirm(`Повністю закрити сесію #${currentRoomCode} та вивільнити слот для інших шкіл?`)) {
+        socket.emit('admin_manage_player', { command: 'close_room', room_code: currentRoomCode });
+      }
+    }
+
+    function createNewRoom() {
+      if (confirm('Створити нову окрему сесію з новим 4-значним PIN-кодом?')) {
+        socket.emit('join_admin', { create_new: true });
+      }
+    }
+
+    function switchRoomPrompt() {
+      const code = prompt('Введіть 4-значний PIN-код існуючої сесії (або новий код):', currentRoomCode);
+      if (!code || !code.trim()) return;
+      socket.emit('join_admin', { room_code: code.trim() });
+    }
+
+    function joinExistingFromModal() {
+      const code = document.getElementById('existingPinInput').value.trim();
+      if (!code) return;
+      socket.emit('join_admin', { room_code: code });
+    }
+
+    function retryCreateRoom() {
+      socket.emit('join_admin', { create_new: true });
+    }
+
+    function showScript(key, tabEl) {
+      document.querySelectorAll('.tele-tab').forEach(t => t.classList.remove('active'));
+      tabEl.classList.add('active');
+      document.getElementById('teleprompterContent').innerHTML = SCRIPTS[key] || '';
+    }
+
+    function getBestPlayUrl() {
+      const suffix = currentRoomCode ? `?room=${currentRoomCode}` : '';
+      const host = window.location.hostname;
+      if (host !== '127.0.0.1' && host !== 'localhost') {
+        return `${window.location.origin}/play${suffix}`;
+      }
+      if (latestShareUrl) {
+        return latestShareUrl;
+      }
+      return `${window.location.origin}/play${suffix}`;
+    }
+
+    function copyPlayLink() {
+      const url = getBestPlayUrl();
+      navigator.clipboard.writeText(url).then(() => {
+        const isNgrok = url.includes('ngrok') || url.startsWith('https://');
+        showToast(isNgrok ? `🌐 Скопійовано публічний лінк (ngrok): ${url}` : `📶 Скопійовано лінк для входу: ${url}`);
+      });
+    }
+
+    function openQrModal() {
+      document.getElementById('qrModalOverlay').style.display = 'flex';
+      renderQrCodeBox();
+    }
+
+    function closeQrModal() {
+      document.getElementById('qrModalOverlay').style.display = 'none';
+    }
+
+    function renderQrCodeBox() {
+      const url = getBestPlayUrl();
+      document.getElementById('qrUrlDisplay').textContent = url;
+      const badge = document.getElementById('qrSourceBadge');
+      if (url.includes('ngrok')) {
+        badge.innerHTML = '🌐 Активний інтернет-тунель <strong>ngrok</strong> (працює з будь-якої точки світу)';
+        badge.style.color = '#059669';
+      } else if (!url.includes('127.0.0.1') && !url.includes('localhost')) {
+        badge.innerHTML = '📶 Локальна Wi-Fi мережа (для входу з усього світу запустіть <code>ngrok http 5000</code>)';
+        badge.style.color = '#D97706';
+      } else {
+        badge.innerHTML = '⚠️ Локальний режим (запустіть <code>ngrok http 5000</code> або введіть лінк нижче)';
+        badge.style.color = '#DC2626';
+      }
+
+      const qrBox = document.getElementById('adminQrContainer');
+      qrBox.innerHTML = '';
+      if (window.QRCode) {
+        new QRCode(qrBox, {
+          text: url,
+          width: 210,
+          height: 210,
+          colorDark: '#064E3B',
+          colorLight: '#FFFFFF',
+          correctLevel: QRCode.CorrectLevel.M
+        });
+      } else {
+        qrBox.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=210x210&data=${encodeURIComponent(url)}" width="210" height="210" alt="QR">`;
+      }
+    }
+
+    function saveCustomShareUrl() {
+      const val = document.getElementById('customUrlInput').value.trim();
+      socket.emit('admin_manage_player', { command: 'set_share_url', url: val });
+    }
+
+    function showToast(msg) {
+      const el = document.getElementById('adminToast');
+      el.textContent = msg;
+      el.style.display = 'block';
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => {
+        el.style.display = 'none';
+      }, 3200);
+    }
+
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function escapeJs(str) {
+      return String(str || '').replace(/'/g, "\\'");
+    }
+  </script>
+</body>
+</html>

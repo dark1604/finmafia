@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Правила Гри, Сценарій Ведучого та Картки Ролей | Кремнієва Долина</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-canvas: #F4F9F6;
+      --bg-mint: #EBF5EE;
+      --primary-green: #10B981;
+      --primary-dark: #059669;
+      --forest: #064E3B;
+      --navy: #0F172A;
+      --muted: #475569;
+      --border: #D1E7DD;
+      --gold: #F59E0B;
+      --red: #EF4444;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg-canvas);
+      color: var(--navy);
+      line-height: 1.55;
+      padding: 28px 20px 60px;
+    }
+
+    .container {
+      max-width: 1080px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .header-box {
+      background: linear-gradient(135deg, #064E3B, #047857);
+      color: #fff;
+      padding: 28px 32px;
+      border-radius: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      box-shadow: 0 12px 30px rgba(6, 78, 59, 0.15);
+    }
+
+    .header-box h1 { font-size: 1.65rem; font-weight: 900; }
+    .header-box p { color: #A7F3D0; font-size: 0.95rem; margin-top: 4px; }
+
+    .print-btn {
+      background: #fff;
+      color: var(--forest);
+      border: none;
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-weight: 800;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .section-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px 28px;
+      box-shadow: 0 6px 20px rgba(6, 78, 59, 0.05);
+    }
+
+    .section-title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--forest);
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--bg-mint);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .quote-box {
+      background: var(--bg-mint);
+      border-left: 4px solid var(--primary-green);
+      padding: 12px 16px;
+      border-radius: 0 10px 10px 0;
+      margin: 10px 0 16px;
+      font-size: 0.94rem;
+    }
+
+    .action-tag {
+      display: inline-block;
+      background: #FEF3C7;
+      color: #92400E;
+      border: 1px solid #FCD34D;
+      padding: 2px 9px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    /* Role Cards Grid */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 18px;
+    }
+
+    .role-card {
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+      page-break-inside: avoid;
+    }
+
+    .role-card.legal {
+      border-color: #6EE7B7;
+      background: linear-gradient(180deg, #FFFFFF 0%, #F0FDF4 100%);
+    }
+
+    .role-card.cartel {
+      border-color: #FCA5A5;
+      background: linear-gradient(180deg, #FFFFFF 0%, #FEF2F2 100%);
+    }
+
+    .role-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .role-name {
+      font-size: 1.15rem;
+      font-weight: 900;
+      color: var(--forest);
+    }
+
+    .role-card.cartel .role-name {
+      color: #991B1B;
+    }
+
+    .team-pill {
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 3px 9px;
+      border-radius: 999px;
+      text-transform: uppercase;
+    }
+
+    .team-legal { background: #D1FAE5; color: #065F46; }
+    .team-cartel { background: #FEE2E2; color: #991B1B; }
+
+    .rights-list {
+      padding-left: 18px;
+      font-size: 0.88rem;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    @media print {
+      .print-btn { display: none; }
+      body { background: #fff; padding: 0; }
+      .section-card { box-shadow: none; break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header-box">
+      <div>
+        <h1>🌱 Кремнієва Долина: Битва Стартапів</h1>
+        <p>Посібник Спікера (Ведучого), Правила для Учнів та Картки Прав Ролей (5–9 класи)</p>
+      </div>
+      <button class="print-btn" onclick="window.print()">🖨️ Роздрукувати / Зберегти PDF</button>
+    </header>
+
+    <!-- 1. ПРАВИЛА ДЛЯ УЧНІВ -->
+    <section class="section-card">
+      <div class="section-title">🎓 Частина 1. Правила гри для учнів (Засновників Стартапів)</div>
+      <p style="margin-bottom: 12px;">
+        Кожен із вас — засновник власної технологічної компанії у Кремнієвій Долині. На старті ваш венчурний фонд видає вам <strong>100 🪙 Startup-Coins (SC)</strong>.
+      </p>
+      <ul class="rights-list">
+        <li><strong>Монетки (🪙 SC) — це життя вашого бізнесу:</strong> поки у вас більше 0 🪙 SC, ваша компанія працює, заробляє дивіденди і має право голосу. Якщо баланс падає до <strong>0 🪙 SC</strong> — компанія стає <strong>Банкрутом</strong> і втрачає право голосувати та діяти вночі.</li>
+        <li><strong>Фінансова подушка безпеки (>100 🪙 SC):</strong> атака Рейдера вночі забирає рівно <strong>-100 🪙 SC</strong>. Якщо у вас на рахунку <strong>110 🪙 SC</strong> або більше — після атаки у вас залишиться 10+ 🪙 SC, і <strong>ваш бізнес виживе!</strong></li>
+        <li><strong>Як заробити додаткові монетки:</strong>
+          <ul>
+            <li><strong>+10 🪙 SC щоранку</strong> — базовий дохід (дивіденди) для всіх активних компаній.</li>
+            <li><strong>+20 🪙 SC премія</strong> — отримують усі легальні компанії, якщо на денному голосуванні вдалося викрити Рейдера або Інсайдера.</li>
+            <li><strong>+10 🪙 SC грант від Ведучого</strong> — за переконливий виступ (Pitch), логічну аргументацію або фінансово грамотну відповідь.</li>
+          </ul>
+        </li>
+        <li><strong>Таємниця екрана:</strong> нікому не показуйте свій смартфон. Для захисту від підглядання сусіда використовуйте кнопку <strong>«👁️ Приховати/Показати»</strong>.</li>
+      </ul>
+    </section>
+
+    <!-- 2. СЦЕНАРІЙ ТА РІШЕННЯ СПІКЕРА -->
+    <section class="section-card">
+      <div class="section-title">🎙️ Частина 2. Путівник Спікера / Ведучого (Фрази та Рішення)</div>
+
+      <div style="margin-bottom: 18px;">
+        <span class="action-tag">ЕТАП 1: ЛОБІ ТА СТАРТ СЕСІЇ</span>
+        <p><strong>Дія в `/admin`:</strong> Перевір, що всі учні зайшли на `/play`. Натисни кнопку <strong>«⚖️ Авто-баланс та Роздача Ролей»</strong>.</p>
+        <div class="quote-box">
+          <strong>Слова Спікера:</strong> «Вітаю інноваторів у Кремнієвій Долині! Сьогодні кожен із вас очолює стартап із капіталом 100 Startup-Coins. Проте на ринку з’явився Тіньовий Картель — Рейдери та Інсайдер, які хочуть рейдерськими атаками довести чесні компанії до банкрутства. Подивіться у свої смартфони, запам’ятайте свою роль і натисніть кнопку "Приховати", щоб сусіди не підглянули!»
+        </div>
+      </div>
+
+      <div style="margin-bottom: 18px;">
+        <span class="action-tag">ЕТАП 2: НІЧНА СЕСІЯ (Крок 2: 🌙 НІЧ)</span>
+        <p><strong>Дія в `/admin`:</strong> Натисни <strong>«Крок 2: 🌙 НІЧ»</strong>. У цій грі учням НЕ потрібно заплющувати очі, бо всі дії відбуваються безшумно на екранах смартфонів! Але для атмосфери ти оголошуєш чергування фінансових служб:</p>
+        <div class="quote-box">
+          <strong>Слова Спікера:</strong><br>
+          • «Настає ніч у Кремнієвій Долині. Фондова біржа зачиняється на нічний кліринг.»<br>
+          • «Етичні Стартапери читають фінансові поради на своїх екранах, щоб не видати свою роль.»<br>
+          • «Тіньовий Картель (Рейдер та Інсайдер) у своєму зашифрованому чаті обирає компанію для ворожого поглинання на -100 SC.»<br>
+          • «Венчурний Банкір обирає один стартап, якому видає страховий щит на цю ніч.»<br>
+          • «Податковий Аудитор проводить нічну KYC-перевірку однієї компанії та одразу бачить у телефоні: легальний це бізнес чи тіньова схема.»
+        </div>
+        <p><strong>Рішення Спікера:</strong> Коли у блоці <em>«Нічний Моніторинг»</em> ти бачиш, що всі ключові ролі зробили вибір — натискай зелену кнопку <strong>«⚡ Обробити Нічні Транзакції та Оголосити Ранкові Новини»</strong>.</p>
+      </div>
+
+      <div style="margin-bottom: 18px;">
+        <span class="action-tag">ЕТАП 3: РАНОК ТА ПІТЧИНГ (Крок 3: ☀️ ДЕНЬ)</span>
+        <p><strong>Дія в `/admin`:</strong> Зачитай заголовок із великого екрана (`/display`). Починаючи з 2-го раунду, натисни жовту кнопку <strong>«📈 Ранкові дивіденди (+10 🪙 SC активним)»</strong>.</p>
+        <div class="quote-box">
+          <strong>Слова Спікера:</strong> «Біржа відкривається! Усі активні компанії отримують +10 монет ранкових дивідендів. Погляньте на табло біржі: вночі відбулися події... [зачитуєш новину з екрана]. Тепер кожен засновник має 30 секунд на Pitch: розкажіть, чим займається ваш стартап і кого ви підозрюєте у махінаціях!»
+        </div>
+        <p><strong>Рішення Спікера (Мотивація +/- 10 SC):</strong> Якщо учень яскраво захистив свій проєкт або навів сильний фінансовий аргумент — натисни біля нього в таблиці <strong>`+10`</strong> і скажи: <em>«Інвестиційний фонд виділяє стартапу +10 SC за блискучий пітч!»</em>. Якщо хтось кричить з місця або підглядає в чужий телефон — натисни <strong>`-10`</strong>: <em>«Комісія з цінних паперів штрафує компанію на -10 SC за порушення регламенту біржі!»</em>.</p>
+      </div>
+
+      <div>
+        <span class="action-tag">ЕТАП 4: ФІНАНСОВИЙ АУДИТ ТА ГОЛОСУВАННЯ (Кроки 4–5)</span>
+        <p><strong>Дія в `/admin`:</strong> Натисни <strong>«Крок 4: 🗳️ АУДИТ»</strong>. Коли всі проголосували в телефонах — натисни <strong>«Крок 5: ⚖️ ПІДСУМКИ»</strong>.</p>
+        <div class="quote-box">
+          <strong>Слова Спікера:</strong> «Час дебатів вичерпано! Рада директорів переходить до голосування. Оберіть у своїх терміналах компанію, чия діяльність здається вам підозрілою. Компанія з найбільшою кількістю голосів буде примусово ліквідована!»
+        </div>
+        <p><strong>Рішення Спікера після ліквідації:</strong><br>
+          • Якщо ліквідована компанія виявилася <strong>Рейдером або Інсайдером</strong> — урочисто натисни зелену кнопку <strong>«🏆 Бонус за шахрая (+20 🪙 SC легальним)»</strong>!<br>
+          • Якщо залишилися живі шахраї і їх менше, ніж чесних гравців — перемикай назад на <strong>«Крок 2: 🌙 НІЧ»</strong> для наступного раунду.
+        </p>
+      </div>
+    </section>
+
+    <!-- 3. КАРТКИ З ПРАВАМИ КОЖНОЇ РОЛІ -->
+    <section class="section-card">
+      <div class="section-title">🃏 Частина 3. Картки Ролей та Їхні Права</div>
+      <div class="cards-grid">
+
+        <!-- Картка 1: Етичний Стартапер -->
+        <div class="role-card legal">
+          <div>
+            <div class="role-top">
+              <div class="role-name">🌱 Етичний Стартапер</div>
+              <span class="team-pill team-legal">Чесний Ринок</span>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--muted); margin: 8px 0;">
+              Засновник легального інноваційного бізнесу. Основа економіки Кремнієвої Долини.
+            </p>
+            <ul class="rights-list">
+              <li><strong>Право на стартовий капітал:</strong> 100 🪙 SC на старті сесії.</li>
+              <li><strong>Право на дивіденди:</strong> отримує +10 🪙 SC щоранку та +20 🪙 SC за кожного викритого учасника картелю.</li>
+              <li><strong>Нічний режим:</strong> компанія відпочиває, засновник отримує ексклюзивні фінансові підказки у терміналі.</li>
+              <li><strong>Денні права:</strong> право на виступ (Pitch) та вирішальний голос на Раді директорів під час аудиту.</li>
+            </ul>
+          </div>
+          <div style="font-size: 0.8rem; font-weight: 700; color: var(--forest);">
+            🎯 Мета: зберегти капітал і викрити всіх учасників Тіньового Картелю.
+          </div>
+        </div>
+
+        <!-- Картка 2: Податковий Аудитор -->
+        <div class="role-card legal">
+          <div>
+            <div class="role-top">
+              <div class="role-name">🔍 Податковий Аудитор</div>
+              <span class="team-pill team-legal">Чесний Ринок</span>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--muted); margin: 8px 0;">
+              Головний інспектор фінансового моніторингу (KYC — Know Your Customer).
+            </p>
+            <ul class="rights-list">
+              <li><strong>Виключне нічне право:</strong> щоночі перевіряє документацію 1 компанії у своєму терміналі.</li>
+              <li><strong>Доступ до таємниці:</strong> миттєво отримує секретний звіт: <em>«Легальний бізнес»</em> або <em>«Тіньова схема»</em>.</li>
+              <li><strong>Дилема безпеки:</strong> вдень має натякнути чесним стартаперам, хто є шахраєм, але так, щоб Рейдери не здогадалися, хто саме є Аудитором!</li>
+              <li><strong>Економічні права:</strong> отримує всі дивіденди (+10 SC) та премії (+20 SC) нарівні з іншими чесними бізнесами.</li>
+            </ul>
+          </div>
+          <div style="font-size: 0.8rem; font-weight: 700; color: var(--forest);">
+            🎯 Мета: перевірити підозрілі компанії та скерувати голосування класу проти Рейдерів.
+          </div>
+        </div>
+
+        <!-- Картка 3: Венчурний Банкір -->
+        <div class="role-card legal">
+          <div>
+            <div class="role-top">
+              <div class="role-name">🏦 Венчурний Банкір</div>
+              <span class="team-pill team-legal">Чесний Ринок</span>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--muted); margin: 8px 0;">
+              Керівник антикризового інвестиційного фонду Долини.
+            </p>
+            <ul class="rights-list">
+              <li><strong>Право Грантового Щита:</strong> щоночі обирає 1 компанію (може обрати і себе), якій видає страховий грант.</li>
+              <li><strong>Повний захист:</strong> якщо тієї ж ночі Рейдери атакують застраховану компанію, вона <strong>не втрачає жодної монети</strong> (0 замість -100 SC)!</li>
+              <li><strong>Денні права:</strong> бере участь у дебатах, голосує на аудиті та отримує ранкові дивіденди (+10 SC) і бонуси (+20 SC).</li>
+            </ul>
+          </div>
+          <div style="font-size: 0.8rem; font-weight: 700; color: var(--forest);">
+            🎯 Мета: вгадувати, кого вночі атакують Рейдери, та рятувати ключових гравців (особливо Аудитора).
+          </div>
+        </div>
+
+        <!-- Картка 4: Рейдер / Шахрай -->
+        <div class="role-card cartel">
+          <div>
+            <div class="role-top">
+              <div class="role-name">🏴‍☠️ Рейдер / Шахрай</div>
+              <span class="team-pill team-cartel">Тіньовий Картель</span>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--muted); margin: 8px 0;">
+              Організатор недружніх поглинань та фінансових махінацій.
+            </p>
+            <ul class="rights-list">
+              <li><strong>Право Ворожого Поглинання:</strong> щоночі обирає 1 компанію-жертву, списуючи з її рахунку <strong>-100 🪙 SC</strong>.</li>
+              <li><strong>Доступ до Таємного Чату Картелю:</strong> бачить усіх спільників (інших Рейдерів та Інсайдера) і має закритий чат для координації.</li>
+              <li><strong>Маскування вдень:</strong> офіційно виглядає як звичайний стартап, отримує +10 SC ранкових дивідендів і має право голосу на аудиті.</li>
+            </ul>
+          </div>
+          <div style="font-size: 0.8rem; font-weight: 700; color: #991B1B;">
+            🎯 Мета: довести легальні стартапи до банкрутства і не дати викрити себе на голосуванні.
+          </div>
+        </div>
+
+        <!-- Картка 5: Інсайдер Картелю -->
+        <div class="role-card cartel">
+          <div>
+            <div class="role-top">
+              <div class="role-name">🕵️ Інсайдер Картелю</div>
+              <span class="team-pill team-cartel">Тіньовий Картель</span>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--muted); margin: 8px 0;">
+              Таємний агент та стратег картелю всередині Ради директорів.
+            </p>
+            <ul class="rights-list">
+              <li><strong>Право Координації:</strong> має доступ до Таємного Чату Картелю та пропонує Рейдеру нічну мішень.</li>
+              <li><strong>Право Наступництва:</strong> якщо головного Рейдера ліквідували на голосуванні, нічний удар Інсайдера автоматично стає основною атакою картелю (-100 🪙 SC)!</li>
+              <li><strong>Полювання на Аудитора:</strong> уважно слухає денні виступи, щоб вирахувати Податкового Аудитора та підказати Рейдеру атакувати його вночі.</li>
+            </ul>
+          </div>
+          <div style="font-size: 0.8rem; font-weight: 700; color: #991B1B;">
+            🎯 Мета: відводити підозри від Рейдера під час дебатів та вирахувати Аудитора й Банкіра.
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </div>
+</body>
+</html>
